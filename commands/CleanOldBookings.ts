@@ -1,4 +1,5 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
+import Booking from 'App/Models/Booking'
 
 export default class CleanOldBookings extends BaseCommand {
   /**
@@ -28,6 +29,12 @@ export default class CleanOldBookings extends BaseCommand {
   }
 
   public async run() {
-    this.logger.info('Hello world!')
+    this.logger.info('Cleaning old bookings...')
+
+    await Booking.query()
+      .where('returned', true)
+      .delete()
+
+    this.logger.success('Old bookings cleaned successfully.')
   }
 }

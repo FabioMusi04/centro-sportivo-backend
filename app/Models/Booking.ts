@@ -1,5 +1,15 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, beforeFetch, beforeFind, belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+
+import Course from './Course'
+import User from './User'
+import { softDeleteQuery, softDelete } from 'App/Services/SoftDelete'
+
+export enum Status {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELLED = 'cancelled',
+}
 
 export default class Booking extends BaseModel {
   @column({ isPrimary: true })
@@ -11,6 +21,9 @@ export default class Booking extends BaseModel {
   @column()
   public courseId: number
 
+  @column()
+  public status: Status = Status.PENDING
+
   @column.dateTime()
   public bookingDate: DateTime
 
@@ -19,4 +32,22 @@ export default class Booking extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @column.dateTime()
+  public cancelledAt?: DateTime
+
+  @belongsTo(() => User)
+  public user: BelongsTo<typeof User>
+
+  @belongsTo(() => Course)
+  public course: BelongsTo<typeof Course>
+
+  @beforeFind()
+  public static softDeletesFind = softDeleteQuery;  
+  @beforeFetch()
+  public static softDeletesFetch = softDeleteQuery;
+  
+  public async softDelete(column?: string) {
+    await softDelete(this, column);
+  }
 }

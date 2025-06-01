@@ -1,5 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, belongsTo, BelongsTo, column, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+
+import Booking from './Booking'
+import User from './User'
 
 export default class Course extends BaseModel {
   @column({ isPrimary: true })
@@ -12,14 +15,38 @@ export default class Course extends BaseModel {
   public description: string
 
   @column()
-  public max_participants: number
+  public maxParticipants: number
 
   @column()
-  public instructor_id: number
+  public instructorId: number
+
+  @column()
+  public isActive: boolean
+
+  @column()
+  public location?: string
+
+  @column()
+  public isOnline: boolean
+
+  @column()
+  public category?: string
+
+  @column.dateTime()
+  public startDate: DateTime
+
+  @column.dateTime()
+  public endDate: DateTime
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @belongsTo(() => User)
+  public instructor: BelongsTo<typeof User>
+
+  @hasMany(() => Booking)
+  public bookings: HasMany<typeof Booking>
 }

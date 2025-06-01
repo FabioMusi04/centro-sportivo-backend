@@ -1,5 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+
+import Course from './Course'
+import Booking from './Booking'
 
 export enum UserRole {
   Instructor = 'instructor',
@@ -31,4 +34,10 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @hasMany(() => Course)
+  public courses: HasMany<typeof Course>
+
+  @hasMany(() => Booking)
+  public bookings: HasMany<typeof Booking>
 }

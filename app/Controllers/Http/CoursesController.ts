@@ -7,16 +7,14 @@ export default class CoursesController {
     return await Course.all()
   }
 
-  public async create({}: HttpContextContract) {
-    // Not needed for API, usually for rendering forms in web apps
-  }
+  public async create({}: HttpContextContract) {}
 
   public async store({ request, response }: HttpContextContract) {
     const courseSchema = schema.create({
       title: schema.string({}, [rules.maxLength(255)]),
       description: schema.string.optional({ trim: true }),
-      max_participants: schema.number([rules.unsigned()]),
-      instructor_id: schema.number([rules.unsigned()]),
+      maxParticipants: schema.number([rules.unsigned()]),
+      instructorId: schema.number([rules.unsigned()]),
     })
 
     const payload = await request.validate({ schema: courseSchema })
@@ -33,15 +31,15 @@ export default class CoursesController {
     return course
   }
 
-  public async edit({}: HttpContextContract) {
-    // Not needed for API, usually for rendering forms in web apps
-  }
+  public async edit({}: HttpContextContract) {}
 
-  public async update({ params, request, response }: HttpContextContract) {
+  public async update({ bouncer, params, request, response }: HttpContextContract) {
     const course = await Course.find(params.id)
     if (!course) {
       return response.notFound({ message: 'Course not found' })
     }
+
+    await bouncer.authorize('manageCourse', course)
 
     const courseSchema = schema.create({
       title: schema.string.optional({}, [rules.maxLength(255)]),
@@ -56,12 +54,31 @@ export default class CoursesController {
     return course
   }
 
-  public async destroy({ params, response }: HttpContextContract) {
+  public async destroy({ bouncer, params, response }: HttpContextContract) {
     const course = await Course.find(params.id)
     if (!course) {
       return response.notFound({ message: 'Course not found' })
     }
+
+    await bouncer.authorize('manageCourse', course)
+
     await course.delete()
     return response.noContent()
   }
+
+  public async activeCourses({ response }: HttpContextContract) {
+    const activeCourses = await Course.query()
+      .where('isActive', true)
+      .whereRaw('participants_count < max_participants')
+    return response.ok(activeCourses)
+  }
+
+  public async getCoursesByInstructor({ params, response }: HttpContextContract) {
+    const courses = await Course.query().where('instructorId', params.instructorId)
+    if (courses.length === 0) {
+      return response.notFound({ message: 'No courses found for this instructor' })
+    }
+    return response.ok(courses)
+  }
+  
 }

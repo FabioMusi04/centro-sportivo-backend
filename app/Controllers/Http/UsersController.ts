@@ -69,4 +69,28 @@ export default class UsersController {
     await user.delete()
     return response.noContent()
   }
+
+  public async getUsersNotInAnyCourse({}: HttpContextContract) {
+    const users = await User.query().whereDoesntHave('courses', () => {}).orderBy('name', 'asc')
+
+    if (users.length === 0) {
+      return { message: 'No users found without active courses' }
+    }
+
+    return users
+  }
+
+  public async getInstructorsWithCourses({}: HttpContextContract) {
+    const instructors = await User.query()
+      .where('role', UserRole.Instructor)
+      .preload('courses', (query) => {
+        query.where('isActive', true).orderBy('title', 'asc')
+      })
+
+    if (instructors.length === 0) {
+      return { message: 'No instructors found with active courses' }
+    }
+
+    return instructors
+  }
 }
