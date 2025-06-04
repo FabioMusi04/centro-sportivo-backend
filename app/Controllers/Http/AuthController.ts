@@ -26,9 +26,9 @@ export default class AuthController {
     }
 
     async register(ctx: HttpContextContract) {
-        const { email, password } = ctx.request.all()
+        const { email, password, name } = ctx.request.all()
 
-        if (!email || !password) {
+        if (!email || !password || !name) {
             return ctx.response.status(400).json({ message: 'Email and password are required' })
         }
 
@@ -43,11 +43,12 @@ export default class AuthController {
             const user = await User.create({
                 email,
                 password: hashedPassword,
+                name,
             })
 
             return ctx.response.status(201).json(user)
         } catch (error) {
-            return ctx.response.status(400).json({ message: 'Error registering user' })
+            return ctx.response.status(400).json({ message: `Error registering user: ${error?.message}` })
         }
     }
 }

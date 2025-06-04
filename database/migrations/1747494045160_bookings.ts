@@ -26,6 +26,13 @@ export default class extends BaseSchema {
 
       table.timestamp('booking_date')
 
+      table
+        .enum('status', ['pending', 'confirmed', 'cancelled'])
+        .notNullable()
+        .defaultTo('pending')
+
+      table.timestamp('cancelled_at', { useTz: true }).nullable()
+
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })

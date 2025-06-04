@@ -18,7 +18,7 @@ export default class Course extends BaseModel {
   public maxParticipants: number
 
   @column()
-  public instructorId: number
+  public userId: number //istruttore
 
   @column()
   public isActive: boolean
@@ -45,7 +45,7 @@ export default class Course extends BaseModel {
   public updatedAt: DateTime
 
   @belongsTo(() => User)
-  public instructor: BelongsTo<typeof User>
+  public user: BelongsTo<typeof User>
 
   @hasMany(() => Booking)
   public bookings: HasMany<typeof Booking>

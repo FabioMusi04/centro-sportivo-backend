@@ -4,7 +4,7 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 export default class CoursesController {
   public async index({}: HttpContextContract) {
-    return await Course.all()
+    return await Course.query().preload('user')
   }
 
   public async create({}: HttpContextContract) {}
@@ -24,7 +24,10 @@ export default class CoursesController {
   }
 
   public async show({ params, response }: HttpContextContract) {
-    const course = await Course.find(params.id)
+    const course = await Course.query()
+      .where('id', params.id)
+      .preload('user')
+      .first()
     if (!course) {
       return response.notFound({ message: 'Course not found' })
     }
@@ -70,11 +73,12 @@ export default class CoursesController {
     const activeCourses = await Course.query()
       .where('isActive', true)
       .whereRaw('participants_count < max_participants')
+      .preload('user')
     return response.ok(activeCourses)
   }
 
   public async getCoursesByInstructor({ params, response }: HttpContextContract) {
-    const courses = await Course.query().where('instructorId', params.instructorId)
+    const courses = await Course.query().where('instructorId', params.instructorId).preload('user')
     if (courses.length === 0) {
       return response.notFound({ message: 'No courses found for this instructor' })
     }

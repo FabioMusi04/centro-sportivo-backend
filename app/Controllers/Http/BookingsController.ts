@@ -4,11 +4,22 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 export default class BookingsController {
   public async index({}: HttpContextContract) {
-    return await Booking.all()
+    return await Booking.query()
+      .preload('user')
+      .preload('course', (courseQuery) => {
+        courseQuery.preload('user')
+      })
   }
 
   public async show({ params, response }: HttpContextContract) {
-    const booking = await Booking.find(params.id)
+    const booking = await Booking.query()
+      .where('id', params.id)
+      .preload('user')
+      .preload('course', (courseQuery) => {
+        courseQuery.preload('user')
+      })
+      .first()
+
     if (!booking) {
       return response.notFound({ message: 'Booking not found' })
     }
