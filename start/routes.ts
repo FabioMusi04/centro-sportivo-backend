@@ -1,5 +1,6 @@
+import Hash from '@ioc:Adonis/Core/Hash'
 import Route from '@ioc:Adonis/Core/Route'
-import { UserRole } from 'App/Models/User'
+import User, { UserRole } from 'App/Models/User'
 import { UserFactory, BookingFactory } from 'Database/factories'
 
 Route.post('/register', 'AuthController.register')
@@ -10,6 +11,15 @@ Route.get('/', async () => {
 })
 
 Route.get('/factories', async ({ response }) => {
+  const hashedPassword = await Hash.make("admin")
+
+  await User.create({
+    name: 'Admin User',
+    email: 'admin@admin.com',
+    password: hashedPassword,
+    role: UserRole.Admin,
+  })
+
   const instructor = await UserFactory.merge({ role: UserRole.Instructor }).create()
 
   const bookings = await BookingFactory
@@ -31,9 +41,9 @@ Route.group(() => {
     .apiOnly()
     .middleware({
       '*': ['auth'],
-      store: ['role:admin'],
-      update: ['role:admin'],
-      destroy: ['role:admin'],
+      store: ['role:instructor,admin'],
+      update: ['role:instructor,admin'],
+      destroy: ['role:instructor,admin'],
     })
 
   Route.resource('bookings', 'BookingsController')

@@ -14,7 +14,7 @@ export default class CoursesController {
       title: schema.string({}, [rules.maxLength(255)]),
       description: schema.string.optional({ trim: true }),
       maxParticipants: schema.number([rules.unsigned()]),
-      instructorId: schema.number([rules.unsigned()]),
+      userId: schema.number([rules.unsigned()]),
     })
 
     const payload = await request.validate({ schema: courseSchema })

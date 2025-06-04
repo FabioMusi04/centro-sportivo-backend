@@ -7,6 +7,7 @@ import Booking from './Booking'
 export enum UserRole {
   Instructor = 'instructor',
   User = 'user',
+  Admin = 'admin',
 }
 
 export default class User extends BaseModel {
@@ -23,8 +24,7 @@ export default class User extends BaseModel {
   public password: string
 
   @column({
-    consume: (value?: string) =>
-      value === UserRole.Instructor ? UserRole.Instructor : UserRole.User,
+    consume: (value?: string) => value as UserRole,
     serialize: (value: UserRole) => value,
   })
   public role: UserRole = UserRole.User
